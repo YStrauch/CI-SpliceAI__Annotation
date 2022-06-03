@@ -1,0 +1,6 @@
+.history
+.vscode
+*.egg-info
+dist
+*.pyc
+.DS_Store

@@ -1,5 +1,3 @@
-from typing import List, NamedTuple
-import pyfaidx
 import pandas as pd
 from pkg_resources import resource_filename
 import os
@@ -147,7 +145,7 @@ class DNAPreprocessor():
         offset = const.CONTEXT_LEN//2 + var_spec.max_dist_from_var
         assert seq[offset:offset+len(var_spec.ref)] == var_spec.ref, 'REF annotation mismatch - Expected "%s", found "%s"' % (var_spec.ref, seq[offset:offset+len(var_spec.ref)])
 
-        x = self._onehot(seq)
+        x = self._onehot_seq(seq)
 
         areas_with_ml: List[AreaWithML] = []
 
@@ -172,7 +170,7 @@ class DNAPreprocessor():
 
 
     def apply_var(self, x: np.ndarray, ref:str, alt:str, max_dist_from_var):
-        ref, alt = self._onehot(ref), self._onehot(alt)
+        ref, alt = self._onehot_seq(ref), self._onehot_seq(alt)
         offset = const.CONTEXT_LEN//2 + max_dist_from_var
         assert (x[offset:offset+len(ref)] == ref).all(), 'REF annotation mismatch'
         return np.concatenate([x[:offset], alt, x[offset+len(ref):]])
@@ -182,7 +180,11 @@ class DNAPreprocessor():
         return np.flip(x, axis=1)[::-1]
 
     @classmethod
-    def _onehot(cls, seq):
+    def onehot_and_pad(cls, seq):
+        return np.pad(cls._onehot_seq(seq), ((const.CONTEXT_LEN // 2, const.CONTEXT_LEN // 2), (0, 0)), 'constant')
+
+    @classmethod
+    def _onehot_seq(cls, seq):
         if seq == '':
             return np.zeros((0, 4))
         num = seq.upper().replace('N', '0').replace('A', '1').replace('C', '2').replace('G', '3').replace('T', '4')

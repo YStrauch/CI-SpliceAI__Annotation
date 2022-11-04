@@ -38,7 +38,7 @@ conda activate cis_use
 
 Then, install cispliceai like this (remove [cpu] suffix if you set up a GPU in the previous step):
 ```sh
-pip install cispliceai[cpu]
+pip install "cispliceai[cpu]"
 ```
 
 # Usage
@@ -150,10 +150,34 @@ This tool is very similar to the [SpliceAI](https://github.com/Illumina/SpliceAI
 # Current limitations
 The tool is only using one CPU/GPU max. Multi-processing is currently not supported.
 
+# Prediction of custom sequences
+Since version 1.1, you can predict the likelihood of each nucleotide being a splice site like so:
+```python
+from cispliceai.model import CISpliceAI
+from cispliceai.data import DNAPreprocessor
+
+model = CISpliceAI()
+
+# you can run multiple sequences in a batch
+# you can input sequences of varying length, but it's your responsibility to ensure that the batch fits on memory!
+# The sequences here are only an example, you should upload much longer slices to get sensible results
+predictions = model.predict([
+  DNAPreprocessor.onehot_and_pad('CTTCCTCTCCTCCTGCCCCACCTTCCTCTCCTCCTGCCCCACCAGAACCGGGGGCGGCTGGCAGACAAGAGGACAGTCGCCCTGCCTGCC'),
+  DNAPreprocessor.onehot_and_pad('CTCCTCCTGCCCCACCAGAACCGGGGGCGGCTG'),
+])
+
+# Get acceptor and donor scores for the two sequences
+acceptor_prob_1 = predictions[0][:, 1]
+donor_prob_1 = predictions[0][:, 2]
+
+acceptor_prob_2 = predictions[1][:, 1]
+donor_prob_2 = predictions[1][:, 2]
+```
+
 # Development
 ## To install from a local directory
 ```sh
-pip install -e ./[cpu]
+pip install -e "./[cpu]"
 ```
 
 ## Build to release

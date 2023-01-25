@@ -1,7 +1,8 @@
+import numpy as np
 import pandas as pd
 from pkg_resources import resource_filename
 import os
-import numpy as np
+from typing import List
 
 from cispliceai import const
 from cispliceai import cache

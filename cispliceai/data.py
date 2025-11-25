@@ -168,7 +168,9 @@ class DNAPreprocessor():
                 x_ref = x
             assert len(x_ref) == len(x)
 
-            x_var = self.apply_var(x_ref, var_spec.ref, var_spec.alt, var_spec.max_dist_from_var)
+            x_var = self.apply_var(
+                x_ref, x, var_spec.ref, var_spec.alt, var_spec.max_dist_from_var
+            )
 
             if area.strand == '-':
                 x_ref = self._reverse_complement(x_ref)
@@ -178,11 +180,11 @@ class DNAPreprocessor():
 
         return areas_with_ml
 
-    def apply_var(self, x: np.ndarray, ref:str, alt:str, max_dist_from_var):
+    def apply_var(self, x_masked: np.ndarray, x_unmasked: np.ndarray, ref:str, alt:str, max_dist_from_var):
         ref, alt = self._onehot_seq(ref), self._onehot_seq(alt)
         offset = const.CONTEXT_LEN//2 + max_dist_from_var
-        assert (x[offset:offset+len(ref)] == ref).all(), 'REF annotation mismatch'
-        return np.concatenate([x[:offset], alt, x[offset+len(ref):]])
+        assert (x_unmasked[offset:offset+len(ref)] == ref).all(), 'REF annotation mismatch'
+        return np.concatenate([x_masked[:offset], alt, x_masked[offset+len(ref):]])
 
     @staticmethod
     def _reverse_complement(x: np.ndarray):

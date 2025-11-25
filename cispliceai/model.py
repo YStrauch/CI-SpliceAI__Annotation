@@ -1,5 +1,5 @@
 import os
-from pkg_resources import resource_filename
+import importlib.resources as resources
 import tensorflow as tf
 import numpy as np
 
@@ -10,8 +10,10 @@ except AttributeError:
 
 class CISpliceAI():
     def __init__(self, model_path=None):
-        model_path = resource_filename(__name__, os.path.join('data', 'CI-SpliceAI.pb')) if model_path is None else model_path
-        self._model = self._load_model(model_path)
+        resource = resources.files(__package__).joinpath(os.path.join("data", "CI-SpliceAI.pb")) if model_path is None else model_path
+
+        with resources.as_file(resource) as model_path:
+            self._model = self._load_model(model_path)
 
     def predict(self, batch):
         '''Predicts on a batch of data. Can be of different sequence length, accepts lists, numpy arrays and tf tensors as input.'''

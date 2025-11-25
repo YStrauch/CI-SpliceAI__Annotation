@@ -1,10 +1,11 @@
-from pkg_resources import DistributionNotFound, get_distribution
+from importlib.metadata import version, PackageNotFoundError
 
 NAME = 'cispliceai'
 try:
-    VERSION = get_distribution(NAME).version
-except DistributionNotFound:
-    VERSION = 'LOCAL'
+    VERSION = version(NAME)
+except PackageNotFoundError:
+    VERSION = "LOCAL"
+
 
 PREDICTION_LEN = 5000
 CONTEXT_LEN = 10000

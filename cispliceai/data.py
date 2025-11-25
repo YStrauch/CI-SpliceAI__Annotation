@@ -1,13 +1,12 @@
 import numpy as np
 import pandas as pd
-from pkg_resources import resource_filename
+import importlib.resources as resources
 import os
 from typing import List
 
 from cispliceai import const
 from cispliceai import cache
 from cispliceai.fasta import BaseFasta
-
 
 
 class VariantSpecification():
@@ -99,10 +98,20 @@ class DNAPreprocessor():
                           [0, 0, 1, 0], # G
                           [0, 0, 0, 1]],# T
                           dtype=bool)
-
     def __init__(self, fasta: BaseFasta):
         self._fasta = fasta
-        self._annotation_table_cache = cache.RAMCache(lambda path: pd.read_csv(path).set_index('gene_id'))
+        self._annotation_table_cache = cache.RAMCache(self.load_annotation_table)
+
+    @staticmethod
+    def load_annotation_table(table_arg: str) -> pd.DataFrame:
+        if table_arg == 'grch37' or table_arg == 'grch38':
+            resource_path = os.path.join("data", table_arg + ".csv")
+
+            with resources.files(__package__).joinpath(resource_path).open("rb") as f:
+                return pd.read_csv(f).set_index("gene_id")
+        else:
+            with open(table_arg, "rb") as f:
+                return pd.read_csv(f).set_index("gene_id")
 
     @staticmethod
     def _normalise_chrom(chromosome, has_chr_prefix: bool):
@@ -159,7 +168,9 @@ class DNAPreprocessor():
                 x_ref = x
             assert len(x_ref) == len(x)
 
-            x_var = self.apply_var(x_ref, var_spec.ref, var_spec.alt, var_spec.max_dist_from_var)
+            x_var = self.apply_var(
+                x_ref, x, var_spec.ref, var_spec.alt, var_spec.max_dist_from_var
+            )
 
             if area.strand == '-':
                 x_ref = self._reverse_complement(x_ref)
@@ -169,12 +180,11 @@ class DNAPreprocessor():
 
         return areas_with_ml
 
-
-    def apply_var(self, x: np.ndarray, ref:str, alt:str, max_dist_from_var):
+    def apply_var(self, x_masked: np.ndarray, x_unmasked: np.ndarray, ref:str, alt:str, max_dist_from_var):
         ref, alt = self._onehot_seq(ref), self._onehot_seq(alt)
         offset = const.CONTEXT_LEN//2 + max_dist_from_var
-        assert (x[offset:offset+len(ref)] == ref).all(), 'REF annotation mismatch'
-        return np.concatenate([x[:offset], alt, x[offset+len(ref):]])
+        assert (x_unmasked[offset:offset+len(ref)] == ref).all(), 'REF annotation mismatch'
+        return np.concatenate([x_masked[:offset], alt, x_masked[offset+len(ref):]])
 
     @staticmethod
     def _reverse_complement(x: np.ndarray):
@@ -194,8 +204,6 @@ class DNAPreprocessor():
         return cls.ONE_HOT[num]
 
     def get_overlapping_areas(self, chromosome, position, annotation_table_name: str):
-        if annotation_table_name == 'grch37' or annotation_table_name == 'grch38':
-            annotation_table_name = resource_filename(__name__, os.path.join('data', annotation_table_name + '.csv'))
         annotation_table: pd.DataFrame = self._annotation_table_cache.fetch(annotation_table_name)
 
         chromosome = self._normalise_chrom(chromosome, annotation_table.iloc[0].chr.startswith('chr'))

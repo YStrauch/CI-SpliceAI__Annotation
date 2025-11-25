@@ -433,7 +433,7 @@ class Annotator():
         ) for line in vcf_in_lines for alt in line.alts]
 
         header.add_line(
-            '##INFO=<ID=CI-SpliceAI,Number=.,Type=String,Description="CI-SpliceAI V%s variant annotation for a maximum distance of %d nucleotides from the variant; masking %s; %s nucs outside tx %s. Format: ALLELE|SYMBOL|DS_AG|DS_AL|DS_DG|DS_DL|DP_AG|DP_AL|DP_DG|DP_DL (DS=Delta Score, DP=Delta Position, AG/AL=Acceptor Gain/Acceptor Loss, DG/DL=Donor Gain/Donor Loss). ">\n#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO'
+            '##INFO=<ID=CISpliceAI,Number=.,Type=String,Description="CI-SpliceAI V%s variant annotation for a maximum distance of %d nucleotides from the variant; masking %s; %s nucs outside tx %s. Format: ALLELE|SYMBOL|DS_AG|DS_AL|DS_DG|DS_DL|DP_AG|DP_AL|DP_DG|DP_DL (DS=Delta Score, DP=Delta Position, AG/AL=Acceptor Gain/Acceptor Loss, DG/DL=Donor Gain/Donor Loss). ">\n#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO'
             % (const.VERSION, max_dist_from_var, 'on' if mask else 'off', 'keep' if keep_nucs_outside_gene else 'remove', 'most significant only' if most_significant_only else 'all effects')
         )
 
@@ -460,7 +460,7 @@ class Annotator():
 
         with pysam.VariantFile(vcf_out, 'w', header=header) as file_out:
             for vcf_line, annotation in zip(vcf_in_lines, vcf_annotations):
-                vcf_line.info['CI-SpliceAI'] = annotation
+                vcf_line.info['CISpliceAI'] = annotation
                 file_out.write(vcf_line)
 
     def annotate_json(self, json_in: Union[TextIO,str], json_out: Union[TextIO,str]):

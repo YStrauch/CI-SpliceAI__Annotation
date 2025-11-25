@@ -41,7 +41,7 @@ Then, install cispliceai like this (remove [cpu] suffix if you set up a GPU in t
 pip install "cispliceai[cpu]"
 ```
 
-# Usage
+# Usage (VCF annotation)
 
 ```
 cis-vcf [-h] [--annotation ANNOTATION] [--input INPUT] [--output OUTPUT] [--distance DISTANCE] [--batch BATCH] [--all] [--outside] [--mask] reference
@@ -150,7 +150,15 @@ This tool is very similar to the [SpliceAI](https://github.com/Illumina/SpliceAI
 # Current limitations
 The tool is only using one CPU/GPU max. Multi-processing is currently not supported.
 
-# Prediction of custom sequences
+# Changelog
+
+## Version 1.2
+
+- Fix REF mismatches for variants close to the annotated gene bounds (see [#8](https://github.com/YStrauch/CI-SpliceAI__Annotation/issues/8))
+- Change VCF output INFO-Field from "CI-SpliceAI" to "CISpliceAI" (i.e. remove hyphen) for better compatibility with VCF standard
+- Remove deprecated library pkg_resources
+
+## Version 1.1 - Prediction of custom sequences
 Since version 1.1, you can predict the likelihood of each nucleotide being a splice site like so:
 ```python
 from cispliceai.model import CISpliceAI

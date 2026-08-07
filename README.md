@@ -152,6 +152,11 @@ The tool is only using one CPU/GPU max. Multi-processing is currently not suppor
 
 # Changelog
 
+## Version 1.2.1
+
+- Prevent variants early in the chromosome to result in invalid offsets when applying padding
+
+
 ## Version 1.2
 
 - Fix REF mismatches for variants close to the annotated gene bounds (see [#8](https://github.com/YStrauch/CI-SpliceAI__Annotation/issues/8))

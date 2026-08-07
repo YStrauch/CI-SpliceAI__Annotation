@@ -152,9 +152,14 @@ The tool is only using one CPU/GPU max. Multi-processing is currently not suppor
 
 # Changelog
 
-## Version 1.2.1
+## Version 1.2.2
 
 - Prevent variants early in the chromosome to result in invalid offsets when applying padding
+
+## Version 1.2.1 (discouraged)
+
+- Tried to prevent variants early in the chromosome to result in invalid offsets when applying padding,
+  but did it wrong and caused REF mismatches or wrong predictions. Use discouraged, hotfixed in 1.2.2.
 
 
 ## Version 1.2

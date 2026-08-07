@@ -147,15 +147,25 @@ class DNAPreprocessor():
                 for strand in ['+', '-']
             ]
         extract_start, extract_len = var_spec.pos-window_size, 2*window_size+len(var_spec.ref)
+
         # ensure that the reference length is divisible by 2 or delta position will be half
         if extract_len % 2 != 0:
             extract_len += 1
 
         # don't clip outside of the chromosome (we're 1based)
+        pad_start_by = 0
         if extract_start < 1:
+            pad_start_by = abs(extract_start)+1
+            extract_len -= pad_start_by
             extract_start = 1
 
+
         seq = self._fasta.extract(var_spec.reference_path, var_spec.chrom, extract_start, extract_len)
+
+        # pad at the start, if needed
+        if pad_start_by:
+            seq = "N"*pad_start_by + seq
+
         offset = const.CONTEXT_LEN//2 + var_spec.max_dist_from_var
         assert seq[offset:offset+len(var_spec.ref)] == var_spec.ref, 'REF annotation mismatch - Expected "%s", found "%s"' % (var_spec.ref, seq[offset:offset+len(var_spec.ref)])
 
